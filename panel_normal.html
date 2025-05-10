@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Usuario Normal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Add these color styles */
+    .role-admin { color: #dc3545; font-weight: 600; } /* Red for admin */
+    .role-superadmin { color: #6f42c1; font-weight: 600; } /* Purple for superadmin */
+    .role-normal { color: #6c757d; } /* Gray for normal users */
+  </style>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="#perfil">Mi Perfil</a></li>
+      <li><a href="#configuracion">Configuración</a></li>
+      <li><a href="#soporte">Soporte</a></li>
+      <li><a href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+    </ul>
+  </nav>
+
+  <div class="admin-container">
+    <header class="admin-header">
+      <div class="header-content">
+        <h1>Bienvenido, <span class="user-role">Usuario Normal</span></h1>
+        <p class="welcome-message">Este es tu panel de usuario. Solo puedes ver información.</p>
+      </div>
+    </header>
+
+    <div class="data-section">
+      <h2><i class="fas fa-users"></i> Usuarios Registrados</h2>
+      <div class="table-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Users will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://shvkkhtmdzrsaitoxvuo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodmtraHRtZHpyc2FpdG94dnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzODE0MDEsImV4cCI6MjA1OTk1NzQwMX0.SFqSZsoX4YfRjOOdNLqrqqHgrY01bLS7iwuH9iWfnNo';
+
+    const usuario = JSON.parse(localStorage.getItem('usuario_autenticado'));
+    if (!usuario || !usuario.usuario_normal) {
+      window.location.href = "index.html";
+    }
+
+    async function fetchUsers() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?select=*`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        if (!response.ok) throw new Error('Error fetching users');
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        return [];
+      }
+    }
+
+    async function displayUsers() {
+      const users = await fetchUsers();
+      const tableBody = document.getElementById('usersTableBody');
+      
+      tableBody.innerHTML = users.map(user => {
+        // Determine role and color class
+        let role, roleClass;
+        if (user.usuario_superadministrador) {
+          role = 'Superadmin';
+          roleClass = 'role-superadmin';
+        } else if (user.usuario_administrador) {
+          role = 'Administrador';
+          roleClass = 'role-admin';
+        } else {
+          role = 'Usuario Normal';
+          roleClass = 'role-normal';
+        }
+        
+        return `
+          <tr>
+            <td>${user.id_usuario || 'N/A'}</td>
+            <td>${user.nombre_usuario || 'N/A'}</td>
+            <td>${user.email || 'N/A'}</td>
+            <td class="${roleClass}">${role}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', displayUsers);
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario_autenticado');
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+:root {
+    /* Elegant Color Variables */
+    --primary-color: #5D5FEF;       /* Soft royal blue */
+    --primary-dark: #3A3CD9;        /* Deep blue */
+    --primary-light: #E0E1FF;       /* Light lavender */
+    --secondary-color: #6C757D;     /* Cool gray */
+    --background: #F8F9FA;          /* Very light gray */
+    --surface: #FFFFFF;             /* Pure white */
+    --text-primary: #212529;        /* Dark charcoal */
+    --text-secondary: #495057;      /* Medium gray */
+    --accent-color: #20C997;        /* Teal accent */
+    --error: #DC3545;               /* Modern red */
+    --success: #28A745;             /* Fresh green */
+    --warning: #FFC107;             /* Golden yellow */
+    --info: #17A2B8;                /* Ocean blue */
+    
+    /* UI Variables */
+    --border-radius: 8px;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #1AAE9F 100%);
+    
+    /* Semantic Colors */
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --error-bg: rgba(220, 53, 69, 0.1);
+    --warning-bg: rgba(255, 193, 7, 0.1);
+    --info-bg: rgba(23, 162, 184, 0.1);
+  }
+  
+  /* Base Styles */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+  }
+  
+  /* Container Styles */
+  .container {
+    width: 90%;
+    max-width: 450px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--surface);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  /* Typography */
+  h2 {
+    color: var(--primary-color);
+    text-align: center;
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-color);
+    margin: 0.5rem auto;
+    border-radius: 3px;
+  }
+  
+  /* Form Elements */
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  
+  button {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 1rem 0;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  button:active {
+    transform: translateY(0);
+  }
+  
+  button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+  }
+  
+  button:focus:not(:active)::after {
+    animation: ripple 0.6s ease-out;
+  }
+  
+  /* Links & Text */
+  p {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+  
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+  
+  a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+  }
+  
+  /* Messages */
+  .message {
+    padding: 0.75rem;
+    margin: 1rem 0;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: 600;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .message.error {
+    background-color: rgba(229, 57, 53, 0.1);
+    color: var(--error);
+  }
+  
+  .message.success {
+    background-color: rgba(67, 160, 71, 0.1);
+    color: var(--success);
+  }
+  
+  /* Form Toggle */
+  .formInactive {
+    display: none;
+    animation: fadeOut 0.3s ease-out;
+  }
+  
+  .formActive {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  /* Select Dropdown */
+  select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background-color: white;
+    transition: var(--transition);
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  
+  /* Panel Navigation */
+  nav {
+    background-color: var(--primary-color);
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+  
+  nav li {
+    margin: 0 1rem;
+  }
+  
+  nav a {
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: var(--transition);
+  }
+  
+  nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(10px); }
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(20, 20);
+      opacity: 0;
+    }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      width: 95%;
+      padding: 1.5rem;
+    }
+  
+    h2 {
+      font-size: 1.5rem;
+    }
+  
+    nav ul {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    nav li {
+      margin: 0.5rem 0;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    :root {
+      --border-radius: 8px;
+    }
+  
+    .container {
+      margin: 1rem auto;
+      padding: 1.25rem;
+    }
+  
+    input, button, select {
+      padding: 0.65rem;
+    }
+  }
+  
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #121212;
+      --surface: #1e1e1e;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  
+    input, select {
+      background-color: #2d2d2d;
+      border-color: #444;
+      color: var(--text-primary);
+    }
+  }
+
+  /* Admin Panel Specific Styles */
+/* Admin Panel Enhancements */
+/* Admin Layout */
+.admin-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .form-section {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    height: fit-content;
+  }
+  
+  .data-section {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+  }
+  
+  /* Table Styles */
+  .table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+  }
+  
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+  }
+  
+  .users-table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 500;
+  }
+  
+  .users-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+  }
+  
+  .users-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .users-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  /* Role Badges */
+  .users-table td:nth-child(4) {
+    font-weight: 500;
+  }
+  
+  .users-table tr:hover td:nth-child(4) {
+    color: var(--primary-dark);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .admin-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-section {
+      order: 2;
+    }
+    
+    .data-section {
+      order: 1;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .users-table {
+      display: block;
+    }
+    
+    .users-table thead {
+      display: none;
+    }
+    
+    .users-table tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--border-radius);
+      padding: 0.5rem;
+    }
+    
+    .users-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .users-table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-right: 1rem;
+    }
+    
+    .users-table .actions {
+      justify-content: flex-end;
+    }
+  }
+  /* Add these new styles at the end of your styles.css file */
+
+/* ROLE COLOR STYLES */
+.role-admin {
+    color: #dc3545 !important; /* Red for admin */
+    font-weight: 600;
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  .role-superadmin {
+    color: #6f42c1 !important; /* Purple for superadmin */
+    font-weight: 600;
+    background-color: rgba(111, 66, 193, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  .role-normal {
+    color: #6c757d !important; /* Gray for normal users */
+    background-color: rgba(108, 117, 125, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  /* Table row hover effects */
+  .users-table tr:hover td {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+  
+  .users-table tr:hover .role-admin {
+    background-color: rgba(220, 53, 69, 0.2);
+  }
+  
+  .users-table tr:hover .role-superadmin {
+    background-color: rgba(111, 66, 193, 0.2);
+  }
+  
+  .users-table tr:hover .role-normal {
+    background-color: rgba(108, 117, 125, 0.2);
+  }
+  
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .role-admin {
+      color: #ff6b6b !important;
+      background-color: rgba(220, 53, 69, 0.3);
+    }
+    
+    .role-superadmin {
+      color: #b197fc !important;
+      background-color: rgba(111, 66, 193, 0.3);
+    }
+    
+    .role-normal {
+      color: #adb5bd !important;
+      background-color: rgba(108, 117, 125, 0.3);
+    }
+    
+    .users-table tr:hover td {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  /* Make sure the colors override any other styles */
+  .users-table td:nth-child(4) {
+    color: inherit !important;
+  }
+  
+  /* Action buttons styling */
+  .no-actions {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.85rem;
+  }
+  
+  .btn-icon.edit {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+  }
+  
+  .btn-icon.delete {
+    background-color: #f8d7da;
+    color: #dc3545;
+  }
+  
+  .btn-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }

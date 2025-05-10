@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administrador</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Add these color styles */
+    .role-admin { color: #dc3545; font-weight: 600; } /* Red for admin */
+    .role-superadmin { color: #6f42c1; font-weight: 600; } /* Purple for superadmin */
+    .role-normal { color: #6c757d; } /* Gray for normal users */
+    .no-actions { color: #6c757d; font-style: italic; }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="#perfil">Mi Perfil</a></li>
+      <li><a href="#usuarios">Gestión de Usuarios</a></li>
+      <li><a href="#configuracion">Configuración</a></li>
+      <li><a href="#soporte">Soporte</a></li>
+      <li><a href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+    </ul>
+  </nav>
+
+  <div class="admin-container">
+    <header class="admin-header">
+      <div class="header-content">
+        <h1>Bienvenido, <span class="user-role">Administrador</span></h1>
+        <p class="welcome-message">Este es tu panel de administración. Puedes gestionar usuarios normales.</p>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <div class="form-section">
+        <button class="btn btn-primary" id="createUserBtn">
+          <i class="fas fa-plus"></i> Crear Nuevo Usuario
+        </button>
+        
+        <div class="modal" id="createUserModal">
+          <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+            <form id="createUserForm">
+              <div class="form-group">
+                <label for="newUserId">Identificación</label>
+                <input type="text" id="newUserId" required>
+              </div>
+              <div class="form-group">
+                <label for="newUserName">Nombre</label>
+                <input type="text" id="newUserName" required>
+              </div>
+              <div class="form-group">
+                <label for="newUserEmail">Email</label>
+                <input type="email" id="newUserEmail" required>
+              </div>
+              <div class="form-group">
+                <label for="newUserRole">Rol</label>
+                <select id="newUserRole" required>
+                  <option value="normal">Usuario Normal</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="newUserPassword">Contraseña</label>
+                <input type="password" id="newUserPassword" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Crear Usuario</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <h2><i class="fas fa-users"></i> Usuarios Registrados</h2>
+        <div class="table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Users will be inserted here dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://shvkkhtmdzrsaitoxvuo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodmtraHRtZHpyc2FpdG94dnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzODE0MDEsImV4cCI6MjA1OTk1NzQwMX0.SFqSZsoX4YfRjOOdNLqrqqHgrY01bLS7iwuH9iWfnNo';
+
+    const usuario = JSON.parse(localStorage.getItem('usuario_autenticado'));
+    if (!usuario || !usuario.usuario_administrador) {
+      window.location.href = "index.html";
+    }
+
+    async function fetchUsers() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?select=*`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        if (!response.ok) throw new Error('Error fetching users');
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        return [];
+      }
+    }
+
+    async function displayUsers() {
+      const users = await fetchUsers();
+      const tableBody = document.getElementById('usersTableBody');
+      
+      tableBody.innerHTML = users.map(user => {
+        // Determine role and color class
+        let role, roleClass;
+        if (user.usuario_superadministrador) {
+          role = 'Superadmin';
+          roleClass = 'role-superadmin';
+        } else if (user.usuario_administrador) {
+          role = 'Administrador';
+          roleClass = 'role-admin';
+        } else {
+          role = 'Usuario Normal';
+          roleClass = 'role-normal';
+        }
+        
+        // Admin can't edit superadmins or other admins
+        const canEdit = !user.usuario_superadministrador && !user.usuario_administrador;
+        
+        return `
+          <tr>
+            <td>${user.id_usuario || 'N/A'}</td>
+            <td>${user.nombre_usuario || 'N/A'}</td>
+            <td>${user.email || 'N/A'}</td>
+            <td class="${roleClass}">${role}</td>
+            <td class="actions">
+              ${canEdit ? `
+                <button class="btn-icon edit" data-id="${user.id_usuario}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon delete" data-id="${user.id_usuario}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              ` : '<span class="no-actions">No permitido</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      displayUsers();
+      
+      const modal = document.getElementById('createUserModal');
+      const btn = document.getElementById('createUserBtn');
+      const span = document.querySelector('.close-modal');
+
+      btn.onclick = () => modal.style.display = 'flex';
+      span.onclick = () => modal.style.display = 'none';
+      window.onclick = (event) => {
+        if (event.target == modal) modal.style.display = 'none';
+      }
+
+      document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const newUser = {
+          nombre_usuario: document.getElementById('newUserName').value,
+          email: document.getElementById('newUserEmail').value,
+          clave_encriptada: document.getElementById('newUserPassword').value,
+          usuario_normal: document.getElementById('newUserRole').value === 'normal',
+          usuario_administrador: document.getElementById('newUserRole').value === 'admin',
+          usuario_superadministrador: false
+        };
+
+        try {
+          const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(newUser)
+          });
+
+          if (!response.ok) throw new Error('Error creating user');
+          
+          alert('Usuario creado exitosamente!');
+          modal.style.display = 'none';
+          document.getElementById('createUserForm').reset();
+          displayUsers();
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al crear usuario: ' + error.message);
+        }
+      });
+    });
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario_autenticado');
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro e Inicio de Sesión</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .formInactive {
+      display: none;
+    }
+
+    .toggleLink {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="formTitle">Iniciar Sesión</h2>
+
+    <!-- FORMULARIO DE LOGIN -->
+    <form id="loginForm" class="formActive">
+      <input type="text" id="loginIdentificacion" placeholder="Identificación" required />
+      <input type="password" id="loginClave" placeholder="Contraseña" required />
+      <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    <!-- FORMULARIO DE REGISTRO OCULTO AL INICIO -->
+    <form id="registerForm" class="formInactive">
+        <input type="text" id="registerIdentificacion" placeholder="Identificación" required />
+        <input type="text" id="registerNombre" placeholder="Nombre completo" required />
+        <input type="email" id="registerCorreo" placeholder="Correo electrónico" required />
+        <input type="password" id="registerClave" placeholder="Contraseña" required />
+        <input type="password" id="confirmClave" placeholder="Confirmar Contraseña" required />
+      
+        <select id="registerRol" required>
+          <option value="" disabled selected>Selecciona un rol</option>
+          <option value="normal">Usuario Normal</option>
+          <option value="administrador">Administrador</option>
+          <option value="superadministrador">Superadministrador</option>
+        </select>
+      
+        <button type="submit">Registrarse</button>
+      </form>
+
+    <div id="mensaje" class="message"></div>
+
+    <!-- ENLACE PARA CAMBIAR ENTRE LOGIN Y REGISTRO -->
+    <p id="toggleLink" class="toggleLink">
+      ¿No tienes cuenta?
+      <a href="javascript:void(0)" onclick="toggleForm()">Regístrate aquí</a>
+    </p>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://shvkkhtmdzrsaitoxvuo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodmtraHRtZHpyc2FpdG94dnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzODE0MDEsImV4cCI6MjA1OTk1NzQwMX0.SFqSZsoX4YfRjOOdNLqrqqHgrY01bLS7iwuH9iWfnNo'
+    const mensajeDiv = document.getElementById('mensaje');
+
+    function toggleForm() {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const formTitle = document.getElementById('formTitle');
+      const toggleLink = document.getElementById('toggleLink');
+
+      const isLoginActive = !loginForm.classList.contains('formInactive');
+
+      loginForm.classList.toggle('formInactive', isLoginActive);
+      registerForm.classList.toggle('formInactive', !isLoginActive);
+
+      formTitle.textContent = isLoginActive ? 'Registro' : 'Iniciar Sesión';
+      toggleLink.innerHTML = isLoginActive
+        ? '¿Ya tienes cuenta? <a href="javascript:void(0)" onclick="toggleForm()">Inicia sesión aquí</a>'
+        : '¿No tienes cuenta? <a href="javascript:void(0)" onclick="toggleForm()">Regístrate aquí</a>';
+    }
+
+    // LOGIN
+    // LOGIN
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const identificacion = document.getElementById('loginIdentificacion').value;
+  const clave = document.getElementById('loginClave').value;
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?identificacion=eq.${identificacion}`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
+
+  const data = await res.json();
+
+  if (res.ok && data.length > 0) {
+    const usuario = data[0];
+
+    if (usuario.clave_encriptada === clave) {
+      localStorage.setItem('usuario_autenticado', JSON.stringify(usuario));
+      mensajeDiv.textContent = 'Inicio de sesión exitoso.';
+      mensajeDiv.className = 'message success';
+
+      // Check the boolean fields instead of the 'rol' field
+      if (usuario.usuario_superadministrador) {
+        window.location.href = 'panel_superadmin.html';
+      } else if (usuario.usuario_administrador) {
+        window.location.href = 'panel_admin.html';
+      } else {
+        window.location.href = 'panel_normal.html';
+      }
+    } else {
+      mensajeDiv.textContent = 'Contraseña incorrecta.';
+      mensajeDiv.className = 'message error';
+    }
+  } else {
+    mensajeDiv.textContent = 'Usuario no encontrado.';
+    mensajeDiv.className = 'message error';
+  }
+});
+
+    // REGISTRO
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const id = document.getElementById('registerIdentificacion').value;
+  const nombre = document.getElementById('registerNombre').value;
+  const email = document.getElementById('registerCorreo').value;
+  const pass = document.getElementById('registerClave').value;
+  const passConfirm = document.getElementById('confirmClave').value;
+  const rol = document.getElementById('registerRol').value;
+
+  if (pass !== passConfirm) {
+    mensajeDiv.textContent = 'Las contraseñas no coinciden.';
+    mensajeDiv.className = 'message error';
+    return;
+  }
+
+  const usuario = {
+    identificacion: id,
+    nombre_usuario: nombre,
+    email: email,
+    clave_encriptada: pass,
+    usuario_normal: rol === 'normal',
+    usuario_administrador: rol === 'administrador',
+    usuario_superadministrador: rol === 'superadministrador'
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(usuario)
+  });
+
+  if (res.ok) {
+    mensajeDiv.textContent = 'Registro exitoso. Ahora inicia sesión.';
+    mensajeDiv.className = 'message success';
+    toggleForm();
+  } else {
+    const errorText = await res.text();
+    mensajeDiv.textContent = 'Error al registrar usuario: ' + errorText;
+    mensajeDiv.className = 'message error';
+  }
+});
+  </script>
+</body>
+</html>
